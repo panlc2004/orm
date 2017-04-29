@@ -7,6 +7,7 @@ import com.czy.core.orm.entity.TestEntity;
 import org.apache.ibatis.annotations.Select;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,5 +24,7 @@ public interface MySqlMapper extends BaseMapper<TestEntity> {
 
     Object callPro(Map<String, Object> params);
     Object callPro3(Map<String, Object> params);
+
+    int insertList1(List<TestEntity> testEntities);
 
 }

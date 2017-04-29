@@ -3,26 +3,28 @@
 
 <mapper namespace="com.czy.core.orm.mapper.MySqlMapper">
 
+    <cache eviction="LRU" flushInterval="60000" size="1024"  readOnly="false"></cache>
+
     <resultMap id="BaseResultMap" type="com.czy.core.orm.entity.TestEntity">
         <id column="ID"  property="id"/>
-        <result column="NAME"  property="name"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
         <association property="one" javaType="com.czy.core.orm.entity.One">
-            <id column="ID_one"  property="id"/>
-            <result column="MEMO_one"  property="memo"/>
-            <result column="TEST_ID_one"  property="testId"/>
-            <result column="NAME_one"  property="name"/>
+            <id column="one_ID"  property="id"/>
+            <result column="one_TEST_ID"  property="testId"/>
+            <result column="one_MEMO" jdbcType="VARCHAR" property="memo"/>
+            <result column="one_NAME" jdbcType="VARCHAR" property="name"/>
         </association>
         <association property="one1" javaType="com.czy.core.orm.entity.One">
-            <id column="ID_one1"  property="id"/>
-            <result column="NAME_one1"  property="name"/>
-            <result column="MEMO_one1"  property="memo"/>
-            <result column="TEST_ID_one1"  property="testId"/>
+            <id column="one1_ID"  property="id"/>
+            <result column="one1_MEMO" jdbcType="VARCHAR" property="memo"/>
+            <result column="one1_NAME" jdbcType="VARCHAR" property="name"/>
+            <result column="one1_TEST_ID"  property="testId"/>
         </association>
         <collection property="oneList" ofType="com.czy.core.orm.entity.One">
-            <id column="ID_oneList"  property="id"/>
-            <result column="MEMO_oneList"  property="memo"/>
-            <result column="NAME_oneList"  property="name"/>
-            <result column="TEST_ID_oneList"  property="testId"/>
+            <id column="oneList_ID"  property="id"/>
+            <result column="oneList_MEMO" jdbcType="VARCHAR" property="memo"/>
+            <result column="oneList_TEST_ID"  property="testId"/>
+            <result column="oneList_NAME" jdbcType="VARCHAR" property="name"/>
         </collection>
     </resultMap>
 
@@ -39,7 +41,7 @@
                 #{id},
             </if>
             <if test="name != null">
-                #{name},
+                #{name, jdbcType=VARCHAR},
             </if>
             <if test="name == null">
                 DEFAULT,
@@ -47,10 +49,33 @@
         </trim>
     </insert>
 
+    <insert id="insertList" parameterType="java.util.ArrayList" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into test
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            ID,
+            NAME,
+        </trim>
+        VALUES
+        <foreach collection="list" item="record" index="index" separator=",">
+            <if test="record.id != null">
+                #{record.id},
+            </if>
+            <if test="id == null">
+                DEFAULT,
+            </if>
+            <if test="record.name != null">
+                #{record.name, jdbcType=VARCHAR},
+            </if>
+            <if test="name == null">
+                DEFAULT,
+            </if>
+        </foreach>
+    </insert>
+
     <update id="updateByPrimaryKey" parameterType="com.czy.core.orm.entity.TestEntity">
         update test
         <trim prefix=" set " suffix=" " suffixOverrides=",">
-            NAME = #{name},
+            NAME = #{name, jdbcType=VARCHAR},
         </trim>
         <trim prefix=" where " suffix=" " suffixOverrides="and">
             ID = #{id} and
@@ -61,7 +86,7 @@
         update test
         <trim prefix=" set " suffix=" " suffixOverrides=",">
             <if test="name != null">
-                NAME = #{name},
+                NAME = #{name, jdbcType=VARCHAR},
             </if>
         </trim>
         <trim prefix=" where " suffix=" " suffixOverrides="and">
@@ -72,7 +97,7 @@
     <update id="updateByParams" parameterType="com.czy.core.orm.entity.TestEntity">
         update test
         <trim prefix=" set " suffix=" " suffixOverrides=",">
-            NAME = #{record.name},
+            NAME = #{record.name,jdbcType=VARCHAR},
         </trim>
         <if test="inParams != null">
             <where>
@@ -123,7 +148,7 @@
                     ID = #{record.id},
                 </if>
                 <if test="record.name != null">
-                    NAME = #{record.name},
+                    NAME = #{record.name, jdbcType=VARCHAR},
                 </if>
             </trim>
             <if test="inParams != null">
@@ -208,23 +233,23 @@
         <trim prefix=" " suffix=" " suffixOverrides=",">
             test.ID,
             test.NAME,
-            ONE_one.MEMO as MEMO_one,
-            ONE_one.ID as ID_one,
-            ONE_one.TEST_ID as TEST_ID_one,
-            ONE_one.NAME as NAME_one,
-            ONE_one1.NAME as NAME_one1,
-            ONE_one1.MEMO as MEMO_one1,
-            ONE_one1.ID as ID_one1,
-            ONE_one1.TEST_ID as TEST_ID_one1,
-            ONE_oneList.MEMO as MEMO_oneList,
-            ONE_oneList.NAME as NAME_oneList,
-            ONE_oneList.TEST_ID as TEST_ID_oneList,
-            ONE_oneList.ID as ID_oneList,
+            ONE_one.TEST_ID as one_TEST_ID,
+            ONE_one.ID as one_ID,
+            ONE_one.MEMO as one_MEMO,
+            ONE_one.NAME as one_NAME,
+            ONE_one1.MEMO as one1_MEMO,
+            ONE_one1.NAME as one1_NAME,
+            ONE_one1.ID as one1_ID,
+            ONE_one1.TEST_ID as one1_TEST_ID,
+            ONE_oneList.MEMO as oneList_MEMO,
+            ONE_oneList.TEST_ID as oneList_TEST_ID,
+            ONE_oneList.NAME as oneList_NAME,
+            ONE_oneList.ID as oneList_ID,
         </trim>
         from test
-        LEFT join ONE ONE_one on test.id = ONE_one.id
-        LEFT join ONE ONE_one1 on test.id = ONE_one1.test_id
-        LEFT join ONE ONE_oneList on test.name = ONE_oneList.name
+        LEFT JOIN ONE ONE_ONE ON TEST.ID = ONE_ONE.ID
+        LEFT JOIN ONE ONE_ONE1 ON TEST.ID = ONE_ONE1.TEST_ID
+        LEFT JOIN ONE ONE_ONELIST ON TEST.NAME = ONE_ONELIST.NAME
         <trim prefix=" where " suffix=" " suffixOverrides="and">
             test.ID = #{id} and
         </trim>
@@ -263,24 +288,24 @@
             <trim prefix=" " suffix=" " suffixOverrides=",">
                 test.ID,
                 test.NAME,
-                ONE_one.MEMO as MEMO_one,
-                ONE_one.ID as ID_one,
-                ONE_one.TEST_ID as TEST_ID_one,
-                ONE_one.NAME as NAME_one,
-                ONE_one1.NAME as NAME_one1,
-                ONE_one1.MEMO as MEMO_one1,
-                ONE_one1.ID as ID_one1,
-                ONE_one1.TEST_ID as TEST_ID_one1,
-                ONE_oneList.MEMO as MEMO_oneList,
-                ONE_oneList.NAME as NAME_oneList,
-                ONE_oneList.TEST_ID as TEST_ID_oneList,
-                ONE_oneList.ID as ID_oneList,
+                ONE_one.TEST_ID as one_TEST_ID,
+                ONE_one.ID as one_ID,
+                ONE_one.MEMO as one_MEMO,
+                ONE_one.NAME as one_NAME,
+                ONE_one1.MEMO as one1_MEMO,
+                ONE_one1.NAME as one1_NAME,
+                ONE_one1.ID as one1_ID,
+                ONE_one1.TEST_ID as one1_TEST_ID,
+                ONE_oneList.MEMO as oneList_MEMO,
+                ONE_oneList.TEST_ID as oneList_TEST_ID,
+                ONE_oneList.NAME as oneList_NAME,
+                ONE_oneList.ID as oneList_ID,
             </trim>
         </if>
         from test
-        LEFT join ONE ONE_one on test.id = ONE_one.id
-        LEFT join ONE ONE_one1 on test.id = ONE_one1.test_id
-        LEFT join ONE ONE_oneList on test.name = ONE_oneList.name
+        LEFT JOIN ONE ONE_ONE ON TEST.ID = ONE_ONE.ID
+        LEFT JOIN ONE ONE_ONE1 ON TEST.ID = ONE_ONE1.TEST_ID
+        LEFT JOIN ONE ONE_ONELIST ON TEST.NAME = ONE_ONELIST.NAME
         <if test="_parameter != null">
             <where>
                 <foreach collection="orCriteria" item="criteria" separator="or">
@@ -323,24 +348,24 @@
             <trim prefix=" " suffix=" " suffixOverrides=",">
                 test.ID,
                 test.NAME,
-                ONE_one.MEMO as MEMO_one,
-                ONE_one.ID as ID_one,
-                ONE_one.TEST_ID as TEST_ID_one,
-                ONE_one.NAME as NAME_one,
-                ONE_one1.NAME as NAME_one1,
-                ONE_one1.MEMO as MEMO_one1,
-                ONE_one1.ID as ID_one1,
-                ONE_one1.TEST_ID as TEST_ID_one1,
-                ONE_oneList.MEMO as MEMO_oneList,
-                ONE_oneList.NAME as NAME_oneList,
-                ONE_oneList.TEST_ID as TEST_ID_oneList,
-                ONE_oneList.ID as ID_oneList,
+                ONE_one.TEST_ID as one_TEST_ID,
+                ONE_one.ID as one_ID,
+                ONE_one.MEMO as one_MEMO,
+                ONE_one.NAME as one_NAME,
+                ONE_one1.MEMO as one1_MEMO,
+                ONE_one1.NAME as one1_NAME,
+                ONE_one1.ID as one1_ID,
+                ONE_one1.TEST_ID as one1_TEST_ID,
+                ONE_oneList.MEMO as oneList_MEMO,
+                ONE_oneList.TEST_ID as oneList_TEST_ID,
+                ONE_oneList.NAME as oneList_NAME,
+                ONE_oneList.ID as oneList_ID,
             </trim>
         </if>
         from test
-        LEFT join ONE ONE_one on test.id = ONE_one.id
-        LEFT join ONE ONE_one1 on test.id = ONE_one1.test_id
-        LEFT join ONE ONE_oneList on test.name = ONE_oneList.name
+        LEFT JOIN ONE ONE_ONE ON TEST.ID = ONE_ONE.ID
+        LEFT JOIN ONE ONE_ONE1 ON TEST.ID = ONE_ONE1.TEST_ID
+        LEFT JOIN ONE ONE_ONELIST ON TEST.NAME = ONE_ONELIST.NAME
         <if test="_parameter != null">
             <where>
                 <foreach collection="orCriteria" item="criteria" separator="or">
@@ -396,14 +421,5 @@
             </trim>
         </if>
     </sql>
-
-
-
-    <select id="callProcedure " statementType="CALLABLE">
-        <!--<![CDATA[-->
-                call proc2(
-                    #{a, mode=IN, jdbcType=INTEGER}
-        <!--< ]]>-->
- </select>
 
 </mapper>

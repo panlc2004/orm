@@ -52,4 +52,16 @@ public class MysqlService {
         SqlSession sqlSession = sqlSessionFactoryBean.openSession();
     }
 
+    @Transactional(value = "tm-default", rollbackFor = Exception.class)
+    public void insertList(List<TestEntity> recordList) {
+        mySqlMapper.insertList(recordList);
+    }
+
+    @Transactional(value = "tm-default", rollbackFor = Exception.class)
+    public void insertList2(List<TestEntity> recordList) {
+        for (TestEntity t : recordList) {
+            mySqlMapper.insert(t);
+        }
+    }
+
 }

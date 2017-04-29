@@ -60,22 +60,49 @@
 
     <select id="callPro" statementType="CALLABLE" resultType="java.lang.String">
       <![CDATA[
+
+
         {
             call pro2(
               #{a, mode=IN, jdbcType=INTEGER}
             )
         }
-      ]]>
+
+
+        ]]>
     </select>
 
     <!--<select id="callPro3" statementType="CALLABLE" resultType="com.czy.core.orm.entity.TestEntity">-->
-        <!--<![CDATA[-->
-        <!--{-->
-            <!--call pro3(-->
-              <!--#{a, mode=IN, jdbcType=INTEGER}-->
-            <!--)-->
-        <!--}-->
-      <!--]]>-->
+    <!--<![CDATA[-->
+    <!--{-->
+    <!--call pro3(-->
+    <!--#{a, mode=IN, jdbcType=INTEGER}-->
+    <!--)-->
+    <!--}-->
+    <!--]]>-->
     <!--</select>-->
+
+    <insert id="insertList1" parameterType="java.util.ArrayList" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        <selectKey resultType="java.lang.Long" keyProperty="id" keyColumn="id" order="BEFORE">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO
+        test(id, NAME)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.name})
+        </foreach>
+    </insert>
+
+
+    <insert id="insertList_right" useGeneratedKeys="true" keyProperty="id" keyColumn="id"
+            parameterType="java.util.ArrayList">
+        INSERT INTO
+        test(id, NAME)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.name})
+        </foreach>
+    </insert>
 
 </mapper>

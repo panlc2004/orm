@@ -11,9 +11,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by panlc on 2017-03-24.
@@ -186,5 +184,114 @@ public class MySqlTest {
         System.out.println(testEntities);
     }
 
+    @Test
+    public void insertList() throws Exception {
+        Date start = new Date();
+        System.out.println(start);
+        List<TestEntity> testEntities = new ArrayList<TestEntity>(3);
+        for (int i = 0; i < 3; i++) {
+            TestEntity t1 = new TestEntity();
+            t1.setName("t1");
+            if (i == 1) {
+                t1.setName("name");
+            }
+            if (i == 2) {
+                t1.setId(1L);
+            }
+
+
+            testEntities.add(t1);
+        }
+
+        mySqlMapper.insertList(testEntities);
+        Date end = new Date();
+        System.out.println(end);
+        System.out.println(testEntities);
+        System.out.println("user:" + (start.getTime() - end.getTime()));    //-568
+    }
+
+    @Test
+    public void insertList2() throws Exception {
+        Date start = new Date();
+        System.out.println(start);
+        int size = 10000;
+        List<TestEntity> testEntities = new ArrayList<TestEntity>(size);
+        for (int i = 0; i < size; i++) {
+            TestEntity t1 = new TestEntity();
+            t1.setName("t1");
+            mySqlMapper.insert(t1);
+        }
+        Date end = new Date();
+        System.out.println(end);
+        System.out.println(testEntities);
+        System.out.println("user:" + (start.getTime() - end.getTime()));
+        //list.size = 1000 ->
+        // [simple:-7849 ; batch:-7525]
+        // [simple:-7770;batch:-7676]
+        // [simple:-7940;batch:-9276]
+        // [simple:-7728;batch:-8458]
+        // [simple:-10152;batch:-7493]
+        // [simple:-9477;batch:-7722]
+
+        //list.size = 10000 ->
+        // [simple:-68879;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+        // [simple:-9477;batch:-7722]
+
+
+        //list.size = 10000 -> simple:-7849 ; batch:-7525
+    }
+
+    @Test
+    public void test3() {
+        MysqlService mysqlService = (MysqlService) ctx.getBean("mysqlService");
+        int size = 1000000;
+        List<TestEntity> testEntities = new ArrayList<TestEntity>(size);
+        Date start = new Date();
+        System.out.println(start);
+        for (int i = 0; i < size; i++) {
+            TestEntity t1 = new TestEntity();
+            t1.setName("t1");
+            if (i == 1) {
+                t1.setName("name");
+            }
+            if (i == 2) {
+//                t1.setId(1L);
+            }
+            testEntities.add(t1);
+        }
+        mysqlService.insertList2(testEntities);
+        Date end = new Date();
+        System.out.println(end);
+        System.out.println(testEntities);
+        System.out.println("user:" + (start.getTime() - end.getTime()));
+    }
+
+    @Test
+    public void test4() {
+        int size = 3;
+        List<TestEntity> testEntities = new ArrayList<TestEntity>(size);
+        Date start = new Date();
+        System.out.println(start);
+        for (int i = 0; i < size; i++) {
+            TestEntity t1 = new TestEntity();
+            t1.setName("t1");
+            if (i == 1) {
+                t1.setName("name");
+            }
+            if (i == 2) {
+//                t1.setId(1L);
+            }
+            testEntities.add(t1);
+        }
+        mySqlMapper.insertList1(testEntities);
+        System.out.println(testEntities);
+    }
 
 }
