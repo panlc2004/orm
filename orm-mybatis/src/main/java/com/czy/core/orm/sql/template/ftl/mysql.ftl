@@ -79,6 +79,28 @@
         </trim>
     </insert>
 
+    <insert id="insertList" parameterType="java.util.ArrayList" useGeneratedKeys="true" keyProperty="<#list entityClassPKColumns as column>${column.property}</#list>" keyColumn="<#list entityClassPKColumns as column>${column.property}</#list>">
+        insert into ${name}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <#list entityClassColumns as column>
+            ${column.column},
+        </#list>
+        </trim>
+        VALUES
+        <foreach collection="list" item="record" index="index" separator=",">
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <#list entityClassColumns as column>
+            <if test="record.${column.property} != null">
+            ${r'#{'}record.${column.property}<#if column.jdbcTypeName??>, jdbcType=${column.jdbcTypeName}</#if>${r'}'},
+            </if>
+            <if test="record.${column.property} == null">
+                DEFAULT,
+            </if>
+        </#list>
+        </trim>
+        </foreach>
+    </insert>
+
     <update id="updateByPrimaryKey" parameterType="${entityClassName}">
         update ${name}
         <trim prefix=" set " suffix=" " suffixOverrides=",">
