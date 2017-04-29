@@ -19,6 +19,8 @@ public interface BaseMapper<T> {
      */
     long insert(T record);
 
+    long insertList(List<T> recordList);
+
     /**
      * 根据主键查询数据——只查询本表数据
      *
