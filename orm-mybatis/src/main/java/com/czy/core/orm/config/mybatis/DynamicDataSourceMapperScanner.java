@@ -1,5 +1,6 @@
 package com.czy.core.orm.config.mybatis;
 
+import com.czy.core.orm.config.exception.ConfigErrorException;
 import com.czy.core.orm.config.mybatis.annotations.AutoMapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -185,7 +186,12 @@ public class DynamicDataSourceMapperScanner extends ClassPathBeanDefinitionScann
             }
 
             //初始化xml文件
-            SqlMapperRegister.registerSqlMapper(mapperClass, sqlSessionFactoryBeanName);
+            try {
+                SqlMapperRegister.registerSqlMapper(mapperClass, sqlSessionFactoryBeanName);
+            } catch (ConfigErrorException e) {
+                throw new ConfigErrorException(mapperClass.getName() + "需要id为" + sqlSessionFactoryBeanName
+                        + "的sqlSessionFactory,但其并未被初始化，请确认是否未配置对应的数据库。");
+            }
 
         }
     }
