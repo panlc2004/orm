@@ -30,7 +30,7 @@ public class BaseServiceImplTest {
     public void init() throws Exception {
         try {
             TestServiceImpl t = new TestServiceImpl();
-            t.init();
+            t.initMapper();
         } catch (Exception e) {
             e.printStackTrace();
         }

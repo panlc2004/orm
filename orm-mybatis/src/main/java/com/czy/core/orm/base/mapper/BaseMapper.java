@@ -1,12 +1,13 @@
 package com.czy.core.orm.base.mapper;
 
-import com.czy.core.orm.base.Procedure;
 import com.czy.core.orm.base.QueryParams;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 /**
+ * 基本Mapper
+ * 其中，关于操作成功条件的返回值，只有在Mybatis 的 defaultExecutorType 配置为“SIMPLE”时才有效
  * Created by panlc on 2017-03-16.
  */
 public interface BaseMapper<T> {
@@ -17,25 +18,25 @@ public interface BaseMapper<T> {
      * @param record 要新增的数据实体
      * @return
      */
-    long insert(T record);
+    int insert(T record);
 
-    long insertList(List<T> recordList);
+    int insertList(List<T> recordList);
 
     /**
      * 根据主键查询数据——只查询本表数据
      *
-     * @param key 主键值
+     * @param id 主键值
      * @return
      */
-    T selectByPrimaryKey(long key);
+    T selectByPrimaryKey(long id);
 
     /**
      * 根据主键查询数据——查询关联表数据
      *
-     * @param key 主键值
+     * @param id 主键值
      * @return
      */
-    T selectRelativeByPrimaryKey(long key);
+    T selectRelativeByPrimaryKey(long id);
 
     /**
      * 根据参数查询数据列表——只查询本表数据

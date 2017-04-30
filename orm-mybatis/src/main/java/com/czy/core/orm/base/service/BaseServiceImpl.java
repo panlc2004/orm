@@ -1,8 +1,10 @@
 package com.czy.core.orm.base.service;
 
+import com.czy.core.orm.base.QueryParams;
 import com.czy.core.orm.base.mapper.BaseMapper;
 import com.czy.core.orm.tool.NullUtil;
 import com.czy.core.orm.tool.SpringContextHelper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
@@ -19,20 +21,27 @@ import java.util.List;
 @EnableTransactionManagement
 public class BaseServiceImpl<T> implements BaseService<T> {
 
+    private int defaultBatchOperateLimit = 10000;
+
     private BaseMapper<T> mapper;
 
     public BaseMapper<T> getMapper() {
         return mapper;
     }
 
+    /**
+     * 初始化mapper类
+     * 默认从Spring容器中查找id为：泛型实体类名 + Mapper 的mapper实例
+     * 可被getMapperName()方法重定向
+     */
     @PostConstruct
-    public void init() {
+    public void initMapper() {
         Class<?> entityClass = getSuperClassGenricType(this.getClass(), 0);
         String mapperName = getMapperName();
         if (NullUtil.isEmpty(mapperName)) {
             mapperName = entityClass.getSimpleName() + "Mapper";
         }
-        mapper = SpringContextHelper.getBeanById(mapperName.substring(0,1).toLowerCase() + mapperName.substring(1,mapperName.length()));
+        mapper = SpringContextHelper.getBeanById(mapperName.substring(0, 1).toLowerCase() + mapperName.substring(1, mapperName.length()));
     }
 
     /**
@@ -67,15 +76,78 @@ public class BaseServiceImpl<T> implements BaseService<T> {
         return (Class) params[index];
     }
 
+    public int insert(T record) {
+        return getMapper().insert(record);
+    }
+
     @Transactional(value = "tm-default", rollbackFor = Exception.class)
-    public void insertList(List<T> recordList) {
-        int limit = 8000;
-        int per = recordList.size() / limit;
+    public int insertList(List<T> recordList) {
+        return insertList(recordList, defaultBatchOperateLimit);
+    }
+
+    @Transactional(value = "tm-default", rollbackFor = Exception.class)
+    public int insertList(List<T> recordList, int batchOperateLimit) {
+        int res = 0;
         int i = 0;
-        for (; i < per; i++) {
-            getMapper().insertList(recordList.subList(i * limit, (i + 1) * limit));
+        int per = recordList.size() / batchOperateLimit;
+        while (i < per) {
+            res = getMapper().insertList(recordList.subList(i * batchOperateLimit, (i + 1) * batchOperateLimit));
+            i++;
         }
-        getMapper().insertList(recordList.subList(per * limit, recordList.size()));
+        res += getMapper().insertList(recordList.subList(per * batchOperateLimit, recordList.size()));
+        return res;
+    }
+
+    public T selectByPrimaryKey(long id) {
+        return getMapper().selectByPrimaryKey(id);
+    }
+
+    public T selectRelativeByPrimaryKey(long id) {
+        return getMapper().selectRelativeByPrimaryKey(id);
+    }
+
+    public List<T> selectListByParams(QueryParams params) {
+        return getMapper().selectListByParams(params);
+    }
+
+    public List<T> selectListRelativeByParams(QueryParams params) {
+        return getMapper().selectListRelativeByParams(params);
+    }
+
+    public T selectOneByParams(QueryParams params) {
+        return getMapper().selectOneByParams(params);
+    }
+
+    public T selectOneRelativeByParams(QueryParams params) {
+        return getMapper().selectOneRelativeByParams(params);
+    }
+
+    public int selectCountByParams(QueryParams params) {
+        return getMapper().selectCountByParams(params);
+    }
+
+    public int updateByPrimaryKey(T record) {
+        return getMapper().updateByPrimaryKey(record);
+    }
+
+    public int updateByPrimaryKeySelective(T record) {
+        return getMapper().updateByPrimaryKeySelective(record);
+    }
+
+    public int updateByParams(T record, QueryParams params) {
+        return getMapper().updateByParams(record, params);
+    }
+
+    public int updateSelectiveByParams(T record, QueryParams params) {
+        return getMapper().updateSelectiveByParams(record, params);
+    }
+
+    public int deleteByPrimaryKey(long id) {
+        return getMapper().deleteByPrimaryKey(id);
+    }
+
+    public int deleteByParams(QueryParams params) {
+        return getMapper().deleteByParams(params);
     }
 
 }
