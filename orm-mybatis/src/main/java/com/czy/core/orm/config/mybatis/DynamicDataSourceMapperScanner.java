@@ -200,7 +200,7 @@ public class DynamicDataSourceMapperScanner extends ClassPathBeanDefinitionScann
      * 获取mapper对应的sqlSessionFactory的名称
      *
      * @param clazz mapper接口类
-     * @return
+     * @return sqlSession的Spring容器中的id
      */
     private String getSqlSessionTemplateBeanName(final Class<?> clazz) {
         try {

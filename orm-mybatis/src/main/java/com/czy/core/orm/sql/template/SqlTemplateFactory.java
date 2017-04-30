@@ -23,7 +23,7 @@ public class SqlTemplateFactory {
      * 获取sqlTemplate
      *
      * @param sqlSessionFactoryBeanName sqlSessionFactory名称
-     * @return
+     * @return sql生成模板
      */
     public static AbstractSqlTemplate getSqlTemplate(String sqlSessionFactoryBeanName) {
         if (!templateCache.containsKey(sqlSessionFactoryBeanName)) {
@@ -35,8 +35,8 @@ public class SqlTemplateFactory {
     /**
      * 创建sqlTemplate
      *
-     * @param sqlSessionFactoryBeanName
-     * @return
+     * @param sqlSessionFactoryBeanName sqlSession在Spring窗口中的id
+     * @return sql生成模板
      */
     private static AbstractSqlTemplate createSqlTemplate(String sqlSessionFactoryBeanName) {
         String dialect = getDialect(sqlSessionFactoryBeanName);
@@ -51,12 +51,11 @@ public class SqlTemplateFactory {
 
     /**
      * 根据sqlSessionFactory名称获取对应数据库类型
-     * @param sqlSessionFactoryBeanName
-     * @return
+     * @param sqlSessionFactoryBeanName sqlSession在Spring窗口中的id
+     * @return 生成的xml文件内容
      */
     private static String getDialect(String sqlSessionFactoryBeanName) {
         MybatisConfig mybatisConfig = SpringContextHelper.getBeanById("mybatisConfig");
-        String sqlSessionDialect = mybatisConfig.getSqlSessionDialect(sqlSessionFactoryBeanName);
-        return sqlSessionDialect;
+        return mybatisConfig.getSqlSessionDialect(sqlSessionFactoryBeanName);
     }
 }

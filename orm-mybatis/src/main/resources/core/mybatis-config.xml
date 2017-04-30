@@ -21,6 +21,6 @@
         <!-- 数据库未响应则超时时间设置 -->
         <setting name="defaultStatementTimeout" value="5000"/>
         <!-- 对于批量更新操作缓存SQL以提高性能 BATCH,SIMPLE -->
-        <setting name="defaultExecutorType" value="BATCH"/>
+        <!--<setting name="defaultExecutorType" value="BATCH"/>-->
     </settings>
 </configuration>

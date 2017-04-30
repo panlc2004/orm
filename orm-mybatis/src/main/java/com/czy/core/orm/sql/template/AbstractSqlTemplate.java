@@ -29,11 +29,11 @@ public abstract class AbstractSqlTemplate {
 
     /**
      * 解析实体，获得对应的表结构
-     * @param entityClass 实体类类型
+     * @param mapperClass mapper类型
      * @return EntityTable
      */
-    public EntityTable anayEntity(Class<?> entityClass) {
-        return EntityHelper.getEntityTableByMapperClass(entityClass);
+    public EntityTable anayEntity(Class<?> mapperClass) {
+        return EntityHelper.getEntityTableByMapperClass(mapperClass);
     }
 
     /**

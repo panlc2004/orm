@@ -1,6 +1,7 @@
 package com.czy.core.orm.config.mybatis;
 
 import com.czy.core.orm.config.datasource.DataSourceBuilder;
+import com.czy.core.orm.config.exception.ConfigErrorException;
 import com.czy.core.orm.tool.NullUtil;
 import com.czy.core.orm.tool.SpringContextHelper;
 import com.czy.core.orm.tool.SpringPropertiesUtil;
@@ -26,13 +27,20 @@ public class MybatisConfig {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
     private SpringContextHelper springContextHelper;
 
-    @Autowired
     private DataSourceBuilder dataSourceBuilder;
 
+    @Autowired
+    public MybatisConfig(SpringContextHelper springContextHelper, DataSourceBuilder dataSourceBuilder) {
+        this.springContextHelper = springContextHelper;
+        this.dataSourceBuilder = dataSourceBuilder;
+    }
+
     public String getSqlSessionDialect(String sqlSessionName) {
+        if (!sqlSessionDialect.containsKey(sqlSessionName)) {
+            throw new ConfigErrorException("id为" + sqlSessionName + "的bean未初始化");
+        }
         return sqlSessionDialect.get(sqlSessionName);
     }
 
@@ -55,7 +63,7 @@ public class MybatisConfig {
     /**
      * 为数据源创建Transactionmanager
      *
-     * @param dataSourceName
+     * @param dataSourceName 数据源名称
      */
     private void registerTransactionmanager(String dataSourceName) {
         String tranBeanName = "tm-" + getDatasourceName(dataSourceName);
@@ -126,7 +134,7 @@ public class MybatisConfig {
                     mappers = new PathMatchingResourcePatternResolver().getResources(mapperLocation);
                     resources.addAll(Arrays.asList(mappers));
                 } catch (IOException e) {
-
+                    logger.error("error occurred: ", e);
                 }
             }
         }
@@ -139,8 +147,8 @@ public class MybatisConfig {
     /**
      * 取数据源名称
      *
-     * @param beanName
-     * @return
+     * @param beanName 数据源id
+     * @return 数据源配置名称
      */
     private String getDatasourceName(String beanName) {
         if (beanName == null || "".equals(beanName)) {

@@ -176,7 +176,7 @@ public class EntityHelper {
      * @param mapperClass
      * @return
      */
-    private static Class<?> getEntityClass(final Class<?> mapperClass) {
+    public static Class<?> getEntityClass(final Class<?> mapperClass) {
         Type[] types = mapperClass.getGenericInterfaces();
         for (Type type : types) {
             if (type instanceof ParameterizedType) {
