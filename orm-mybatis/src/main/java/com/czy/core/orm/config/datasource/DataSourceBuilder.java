@@ -14,8 +14,7 @@ import javax.xml.crypto.URIDereferencer;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by panlc on 2017-03-14.
@@ -139,11 +138,17 @@ public class DataSourceBuilder {
      * @return
      */
     private String[] getDynamicDataSourceNames() {
-        String names = SpringPropertiesUtil.getProperty("dynamic.datasource.names");
-        if (NullUtil.isEmpty(names)) {
-            return new String[0];
+        Map<String, Object> ctxPropertiesMap = SpringPropertiesUtil.getCtxPropertiesMap();
+        Set<String> dbNames = new HashSet<String>();
+        Set<String> configs = ctxPropertiesMap.keySet();
+        for (String config : configs) {
+            if (config.startsWith("dynamic.datasource")) {
+                String[] split = config.split("\\.");
+                dbNames.add(split[2].trim());
+            }
         }
-        return names.trim().split(",");
+        String[] res = new String[dbNames.size()];
+        return dbNames.toArray(res);
     }
 
     /**
