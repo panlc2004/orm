@@ -20,6 +20,13 @@ public interface BaseMapper<T> {
      */
     int insert(T record);
 
+    /**
+     * 批量插入，使用时要注意以下情况：
+     * 1.recordList过长时，一次性提交会失败（SQL长度超过数据库允许）
+     * 2.recordList中，如果有实体的id不为空(被指定了值)，则返回的id不正确。
+     * @param recordList 数据列表
+     * @return
+     */
     int insertList(List<T> recordList);
 
     /**

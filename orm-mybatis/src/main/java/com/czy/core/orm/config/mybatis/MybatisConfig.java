@@ -27,7 +27,7 @@ public class MybatisConfig {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private SpringContextHelper springContextHelper;
+    public SpringContextHelper springContextHelper;
 
     private DataSourceBuilder dataSourceBuilder;
 
@@ -53,7 +53,7 @@ public class MybatisConfig {
     /**
      * 动态注册各数据源Transactionmanager
      */
-    private void registerDynamicTransactionManager() {
+    public void registerDynamicTransactionManager() {
         Map<String, String> customDataSources = dataSourceBuilder.getDatasourceDialect();
         for (String key : customDataSources.keySet()) {
             registerTransactionmanager(key);

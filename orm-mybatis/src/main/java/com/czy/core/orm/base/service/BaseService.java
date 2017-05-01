@@ -21,9 +21,13 @@ public interface BaseService<T> {
     int insert(T record);
 
     /**
+     * 批量新增
+     * 使用注意：
+     * 1.recordList过长时，一次性提交会失败（SQL长度超过数据库允许）
+     * 2.recordList中，如果有实体的id不为空(被指定了值)，则返回的id不正确。
+     * @param recordList 要新增的数据列表
      *
-     * @param recordList
-     * @return
+     * @return 操作成功的条数
      */
     int insertList(List<T> recordList);
 

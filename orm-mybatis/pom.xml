@@ -90,7 +90,8 @@
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-jdbc</artifactId>
-            <version>4.0.4</version>
+            <version>3.7.0</version>
+            <!--<version>4.0.4</version>-->
         </dependency>
 
         <dependency>

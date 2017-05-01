@@ -18,7 +18,6 @@ import java.util.List;
 /**
  * Created by PLC on 2017/4/30.
  */
-@EnableTransactionManagement
 public class BaseServiceImpl<T> implements BaseService<T> {
 
     private int defaultBatchOperateLimit = 10000;
@@ -50,7 +49,7 @@ public class BaseServiceImpl<T> implements BaseService<T> {
      *
      * @return
      */
-    String getMapperName() {
+    public String getMapperName() {
         return null;
     }
 
@@ -80,21 +79,23 @@ public class BaseServiceImpl<T> implements BaseService<T> {
         return getMapper().insert(record);
     }
 
-    @Transactional(value = "tm-default", rollbackFor = Exception.class)
+    @Transactional
     public int insertList(List<T> recordList) {
         return insertList(recordList, defaultBatchOperateLimit);
     }
 
-    @Transactional(value = "tm-default", rollbackFor = Exception.class)
+    @Transactional
     public int insertList(List<T> recordList, int batchOperateLimit) {
         int res = 0;
         int i = 0;
         int per = recordList.size() / batchOperateLimit;
         while (i < per) {
-            res = getMapper().insertList(recordList.subList(i * batchOperateLimit, (i + 1) * batchOperateLimit));
+            res += getMapper().insertList(recordList.subList(i * batchOperateLimit, (i + 1) * batchOperateLimit));
             i++;
         }
-        res += getMapper().insertList(recordList.subList(per * batchOperateLimit, recordList.size()));
+        if (per * batchOperateLimit != recordList.size()) {
+            res += getMapper().insertList(recordList.subList(per * batchOperateLimit, recordList.size()));
+        }
         return res;
     }
 

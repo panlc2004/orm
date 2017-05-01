@@ -91,7 +91,7 @@ public class BaseServiceImplTest {
 
         Date start = new Date();
 
-        service.insertList2(testEntities);
+        service.insertList(testEntities);
 
         Date end = new Date();
         System.out.println(end.getTime() - start.getTime());
@@ -106,5 +106,30 @@ public class BaseServiceImplTest {
      * ==>100000数据
      * SIMPLE:3976,4076,5233,5201,5160,5097,3976,3967,3888
      * BATCH:3685,3632,3684,4199,3176,3603,3702,3670,3638
+     * Ato_noxa/SIMPLE:4225,4142,4047,4129,4048,4142,4141,4326
      *********************/
+
+    @Test
+    public void insertList3() {
+        int size = 10;
+        List<TestEntity> testEntities = new ArrayList<TestEntity>(size);
+        for (int i = 0; i < size; i++) {
+            TestEntity t1 = new TestEntity();
+            t1.setName("t1");
+            if (i == 1) {
+                t1.setName("name");
+            }
+            if (i == 2) {
+                t1.setId(1L);
+            }
+            testEntities.add(t1);
+        }
+
+        Date start = new Date();
+
+        service.insertList3(testEntities);
+
+        Date end = new Date();
+        System.out.println(end.getTime() - start.getTime());
+    }
 }

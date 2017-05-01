@@ -1,7 +1,6 @@
 package com.czy.core.orm.config.datasource;
 
 import com.czy.core.orm.config.exception.DataSourceBuildException;
-import com.czy.core.orm.tool.NullUtil;
 import com.czy.core.orm.tool.SpringContextHelper;
 import com.czy.core.orm.tool.SpringPropertiesUtil;
 import org.slf4j.Logger;
@@ -10,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import javax.xml.crypto.URIDereferencer;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by panlc on 2017-03-14.
@@ -23,32 +24,33 @@ import java.util.*;
 public class DataSourceBuilder {
 
     @Autowired
-    private SpringContextHelper springContextHelper;
+    public SpringContextHelper springContextHelper;
 
     private Map<String, String> datasourceDialect = new HashMap<String, String>();
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 主数据源配置前缀
      */
-    private final String DEFAULT_DATASOURCE_PREFIX = "default.datasource.";
+    protected final String DEFAULT_DATASOURCE_PREFIX = "default.datasource.";
 
     /**
      * 其他数据源配置前缀
      */
-    private final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource.";
+    protected final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource.";
 
-    private final String DATASOURCE_BEAN_PREFIX = "datasource-";
+    protected final String DATASOURCE_BEAN_PREFIX = "datasource-";
 
+    protected final String MAIN_DATASOURCE_SUFFIX = "default";
     /**
      * 主数据源名称
      */
-    private final String MAIN_DATASOURCE_NAME = DATASOURCE_BEAN_PREFIX + "default";
+    protected final String MAIN_DATASOURCE_NAME = DATASOURCE_BEAN_PREFIX + MAIN_DATASOURCE_SUFFIX;
 
+    protected DataSourcePoolType poolType;    //连接池类型
 
-    private DataSourcePoolType poolType;    //连接池类型
-    private Class poolTypeClass;            //连接池初始化类
+    protected Class poolTypeClass;            //连接池初始化类
 
     public Map<String, String> getDatasourceDialect() {
         return datasourceDialect;
@@ -65,7 +67,7 @@ public class DataSourceBuilder {
      *
      * @throws ClassNotFoundException
      */
-    private void initPoolInfo() {
+    protected void initPoolInfo() {
         if (SpringPropertiesUtil.containsKey("datasource.pool")) {
             String property = SpringPropertiesUtil.getProperty("datasource.pool");
             poolType = DataSourcePoolType.valueOf(property);
@@ -93,27 +95,35 @@ public class DataSourceBuilder {
     private void registerDefaultDataSources() {
         Map<String, Object> defaultDataSourceConf = getDefaultDataSourceConf();
         if (defaultDataSourceConf.keySet().size() == 0) {
-            String defaultKey = "default.datasource";
-            if (!SpringPropertiesUtil.containsKey(defaultKey)) {
-                throw new IllegalArgumentException("can not find the default datasource");  //TODO 更完善的提示信息
-            } else {
-                DataSource defaultDatasource = springContextHelper.getBeanById(SpringPropertiesUtil.getStringProperty(defaultKey));
-                String url = null;
-                try {
-                    url = defaultDatasource.getConnection().getMetaData().getURL();
-                } catch (SQLException e) {
-                    logger.error("the datasource with the id{} in spring context can't be connected", SpringPropertiesUtil.getProperty(defaultKey), e);
-                }
-                setDialect(MAIN_DATASOURCE_NAME, url);     //记录主数据源类型
-            }
+            initTargetDefaultDataSource();
         } else {
+            initConfigDefaultDataSource(defaultDataSourceConf);
+        }
+        setDialect(MAIN_DATASOURCE_NAME, defaultDataSourceConf);     //记录主数据源类型
+    }
+
+    private void initTargetDefaultDataSource() {
+        String defaultKey = "default.datasource";
+        if (!SpringPropertiesUtil.containsKey(defaultKey)) {
+            throw new IllegalArgumentException("can not find the default datasource");  //TODO 更完善的提示信息
+        } else {
+            DataSource defaultDatasource = springContextHelper.getBeanById(SpringPropertiesUtil.getStringProperty(defaultKey));
+            String url = null;
             try {
-                springContextHelper.addBean(poolTypeClass, MAIN_DATASOURCE_NAME,
-                        defaultDataSourceConf, poolType.getInitMethod(), poolType.getDestroyMethod());  //注册主数据源
-                setDialect(MAIN_DATASOURCE_NAME, defaultDataSourceConf);     //记录主数据源类型
-            } catch (Exception e) {
-                throw new DataSourceBuildException("error occurred while build defaultDatasource", e);
+                url = defaultDatasource.getConnection().getMetaData().getURL();
+            } catch (SQLException e) {
+                logger.error("the datasource with the id{} in spring context can't be connected", SpringPropertiesUtil.getProperty(defaultKey), e);
             }
+            setDialect(MAIN_DATASOURCE_NAME, url);     //记录主数据源类型
+        }
+    }
+
+    public void initConfigDefaultDataSource(Map<String, Object> defaultDataSourceConf) {
+        try {
+            springContextHelper.addBean(poolTypeClass, MAIN_DATASOURCE_NAME,
+                    defaultDataSourceConf, poolType.getInitMethod(), poolType.getDestroyMethod());  //注册主数据源
+        } catch (Exception e) {
+            throw new DataSourceBuildException("error occurred while build defaultDatasource", e);
         }
     }
 
@@ -157,7 +167,7 @@ public class DataSourceBuilder {
      * @param prefix 指定的前缀，不可为''或null
      * @return 匹配的配置项
      */
-    private Map<String, Object> getDataSourceConf(String prefix) {
+    public Map<String, Object> getDataSourceConf(String prefix) {
         if (prefix == null || "".equals(prefix)) {
             throw new IllegalArgumentException("datasource config prefix can not be null or ''");
         }
@@ -171,33 +181,39 @@ public class DataSourceBuilder {
         if (conf.keySet().size() == 0) {
             logger.warn("datasource config with the prefix {} is empty", prefix);
         }
-        dealUrlForSpecialDataSource(conf, IdentityDialect.SQLITE);
         return conf;
     }
 
     /**
      * 处理特殊数据库类弄的连接URL
-     * @param conf 数据库配置信息
+     *
+     * @param conf     数据库配置信息
      * @param identity 要处理的数据库类型
      * @throws UnsupportedEncodingException
      */
-    private void dealUrlForSpecialDataSource(Map<String, Object> conf, IdentityDialect identity){
+    public void dealUrlForSpecialDataSource(Map<String, Object> conf, IdentityDialect identity) {
         if (conf != null) {
-            String key = "url";
-            if(conf.containsKey(key)) {
-                String val = (String) conf.get(key);
-                IdentityDialect identityDialect = getIdentityDialect(val);
-                if (identity == identityDialect) {
-                    String path = this.getClass().getResource("/").getPath();
-                    try {
-                        path = URLDecoder.decode(path, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        throw new RuntimeException("errored while deal database url");
-                    }
-                    conf.put(key, val.replace("classpath:", path));
+            String val = getUrl(conf);
+            IdentityDialect identityDialect = getIdentityDialect(val);
+            if (identity == identityDialect) {
+                String path = this.getClass().getResource("/").getPath();
+                try {
+                    path = URLDecoder.decode(path, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException("errored while deal database url");
                 }
+                conf.put("url", val.replace("classpath:", path));
             }
         }
+    }
+
+    public String getUrl(Map<String, Object> conf) {
+        String key = "url";
+        if (conf.containsKey(key)) {
+            String url = (String) conf.get(key);
+            return url;
+        }
+        throw new RuntimeException("url is not defined!");
     }
 
     /**
@@ -206,7 +222,7 @@ public class DataSourceBuilder {
      * @return
      */
     private Map<String, Object> getDefaultDataSourceConf() {
-        return getDataSourceConf(DEFAULT_DATASOURCE_PREFIX);
+        return getDataSourceConfigForSpecialDataSource(DEFAULT_DATASOURCE_PREFIX);
     }
 
     /**
@@ -216,7 +232,13 @@ public class DataSourceBuilder {
      * @return
      */
     private Map<String, Object> getDynamicDataSourceConf(String datasourceName) {
-        return getDataSourceConf(DYNAMIC_DATASOURCE_PREFIX + datasourceName + ".");
+        return getDataSourceConfigForSpecialDataSource(DYNAMIC_DATASOURCE_PREFIX + datasourceName + ".");
+    }
+
+    public Map<String, Object> getDataSourceConfigForSpecialDataSource(String prefix) {
+        Map<String, Object> dataSourceConf = getDataSourceConf(prefix);
+        dealUrlForSpecialDataSource(dataSourceConf, IdentityDialect.SQLITE);
+        return dataSourceConf;
     }
 
 
@@ -240,14 +262,15 @@ public class DataSourceBuilder {
      * @param datasourceName 数据源名称
      * @param conf           数据库配置信息
      */
-    private void setDialect(String datasourceName, Map<String, Object> conf) {
+    protected void setDialect(String datasourceName, Map<String, Object> conf) {
         if (conf == null) {
             throw new IllegalArgumentException("datasource config info can not be null");
         } else {
-            if (!conf.containsKey("url")) {
+            String url = getUrl(conf);
+            if (url == null) {
                 throw new IllegalArgumentException("datasource config must contains the key: url");
             } else {
-                setDialect(datasourceName, (String) conf.get("url"));
+                setDialect(datasourceName, url);
             }
         }
     }
@@ -258,7 +281,7 @@ public class DataSourceBuilder {
      * @param datasourceName 数据源名称
      * @param url            数据库连接url
      */
-    private void setDialect(String datasourceName, String url) {
+    protected void setDialect(String datasourceName, String url) {
         datasourceDialect.put(datasourceName, getDBIdentityFromUrl(url));
     }
 
@@ -274,6 +297,7 @@ public class DataSourceBuilder {
 
     /**
      * 获取数据库类型
+     *
      * @param jdbcUrl 数据库连接URL
      * @return IdentityDialect
      */

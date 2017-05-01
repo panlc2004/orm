@@ -31,9 +31,35 @@ public enum DataSourcePoolType {
         public String getDestroyMethod() {
             return null;
         }
-    }
-    ;
+    },
 
+    atomikos_noxa {
+        public String getPoolClass() {
+            return "com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean";
+        }
+
+        public String getInitMethod() {
+            return "init";
+        }
+
+        public String getDestroyMethod() {
+            return "close";
+        }
+    },
+
+    atomikos_xa {
+        public String getPoolClass() {
+            return "com.atomikos.jdbc.AtomikosDataSourceBean";
+        }
+
+        public String getInitMethod() {
+            return "init";
+        }
+
+        public String getDestroyMethod() {
+            return "close";
+        }
+    };
 
     public abstract String getPoolClass();
 

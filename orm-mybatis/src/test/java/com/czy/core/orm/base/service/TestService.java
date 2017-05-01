@@ -9,4 +9,5 @@ import java.util.List;
  */
 public interface TestService extends BaseService<TestEntity> {
     void insertList2(List<TestEntity> recordList);
+    void insertList3(List<TestEntity> recordList);
 }

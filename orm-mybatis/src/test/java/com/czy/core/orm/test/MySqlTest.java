@@ -1,6 +1,5 @@
 package com.czy.core.orm.test;
 
-import com.czy.core.orm.base.Procedure;
 import com.czy.core.orm.base.QueryParams;
 import com.czy.core.orm.entity.TestEntity;
 import com.czy.core.orm.mapper.MySqlMapper;
@@ -32,11 +31,34 @@ public class MySqlTest {
     public void testInsertAndDeleteByPrimaryKeyAndUpdate() {
         TestEntity testEntity = new TestEntity();
 //        testEntity.setName("tsetest");
-        long insert = mySqlMapper.insert(testEntity);
+//        long insert = mySqlMapper.insert(testEntity);
+        TestEntity testEntity2 = new TestEntity();
+        testEntity2.setId(1L);
+        long insert2 = mySqlMapper.insert(testEntity2);
         Assert.assertTrue(testEntity.getId() != null);
         testEntity.setName("q23");
         int i = mySqlMapper.updateByPrimaryKey(testEntity);
         int delete = mySqlMapper.deleteByPrimaryKey(testEntity.getId());
+    }
+
+    @Test
+    public void testInsertList() {
+        List<TestEntity> tList = new ArrayList<TestEntity>(2);
+
+        TestEntity testEntity = new TestEntity();
+        testEntity.setId(11L);
+        TestEntity testEntity2 = new TestEntity();
+//        testEntity2.setId(12L);
+        TestEntity testEntity3 = new TestEntity();
+//        testEntity3.setId(13L);
+
+
+        tList.add(testEntity);
+        tList.add(testEntity2);
+        tList.add(testEntity3);
+
+        int i = mySqlMapper.insertList(tList);
+        System.out.println(2);
     }
 
     @Test

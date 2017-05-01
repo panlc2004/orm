@@ -80,9 +80,6 @@
     </insert>
 
     <insert id="insertList" parameterType="java.util.ArrayList" useGeneratedKeys="true" keyProperty="<#list entityClassPKColumns as column>${column.property}</#list>" keyColumn="<#list entityClassPKColumns as column>${column.property}</#list>">
-        <#--<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="<#list entityClassPKColumns as column>${column.property}</#list>" keyColumn="<#list entityClassPKColumns as column>${column.property}</#list>">-->
-            <#--SELECT LAST_INSERT_ID()-->
-        <#--</selectKey>-->
         insert into ${name}
         <trim prefix="(" suffix=")" suffixOverrides=",">
         <#list entityClassColumns as column>
