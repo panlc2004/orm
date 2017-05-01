@@ -48,7 +48,6 @@ public class TestServiceImplTest {
 
         Date start = new Date();
 
-//        service.insertList(testEntities);
         service.insertBetweenDiffDb(testEntities);
 
         Date end = new Date();

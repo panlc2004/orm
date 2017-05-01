@@ -22,8 +22,10 @@ public class AtoTestServiceImpl extends BaseServiceImpl<TestEntity> implements A
     @Transactional
     public int insertBetweenDiffDb(List<TestEntity> recordList) {
         int i = recordList.size() / 2;
-        super.insertList(recordList);
-        testService.insertList(recordList);
+        super.insertList(recordList.subList(0, i));
+        List<TestEntity> recordList1 = recordList.subList(i, recordList.size());
+        recordList.get(50).setId(1L);
+        testService.insertList(recordList1);
         return 12;
     }
 
