@@ -1,5 +1,6 @@
 package com.czy.core.orm.config.mybatis;
 
+import com.czy.core.orm.config.DataBaseEnvInit;
 import com.czy.core.orm.config.mybatis.annotations.AutoMapper;
 import com.czy.core.orm.tool.NullUtil;
 import com.czy.core.orm.tool.SpringPropertiesUtil;
@@ -24,6 +25,9 @@ import javax.annotation.PostConstruct;
 public class MapperConfiguration implements BeanPostProcessor {
 
     private Log logger = LogFactory.getLog(MapperConfiguration.class);
+
+    @Autowired
+    private DataBaseEnvInit dataBaseEnvInit;    //让该类在DataBaseEnvInit初始化之后再进行初始化，低版本Spring中不可删除。无其他作用
 
     @Autowired
     private MybatisConfig mybatisConfig;

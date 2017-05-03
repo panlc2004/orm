@@ -1,6 +1,9 @@
 package com.czy.core.orm.config.datasource;
 
+import com.czy.core.orm.config.exception.ConfigErrorException;
+import com.czy.core.orm.config.exception.DataSourceBuildException;
 import com.czy.core.orm.tool.NullUtil;
+import com.czy.core.orm.tool.SpringPropertiesUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +12,34 @@ import java.util.Map;
  * Created by PLC on 2017/5/1.
  */
 public class AtomikosDataSourceBuilder extends DataSourceBuilder {
+
+    /**
+     * 初始连接池信息
+     *
+     * @throws ClassNotFoundException
+     */
+    @Override
+    protected void initPoolInfo() {
+        if (SpringPropertiesUtil.containsKey("datasource.pool")) {
+            String property = SpringPropertiesUtil.getProperty("datasource.pool");
+            if (property.startsWith("atomikos")) {
+                try {
+                    poolType = DataSourcePoolType.valueOf(property);
+                } catch (Exception e) {
+                    throw new ConfigErrorException("不支持的连接池类型：" + property);
+                }
+            } else {
+                poolType = DataSourcePoolType.atomikos_noxa;
+            }
+        } else {
+            poolType = DataSourcePoolType.atomikos_noxa;
+        }
+        try {
+            poolTypeClass = Class.forName(poolType.getPoolClass());
+        } catch (ClassNotFoundException e) {
+            throw new DataSourceBuildException(poolType.getPoolClass() + " is not found!");
+        }
+    }
 
     @Override
     public String getUrl(Map<String, Object> conf) {

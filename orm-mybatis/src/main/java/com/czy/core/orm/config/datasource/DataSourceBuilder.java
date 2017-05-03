@@ -33,12 +33,12 @@ public class DataSourceBuilder {
     /**
      * 主数据源配置前缀
      */
-    protected final String DEFAULT_DATASOURCE_PREFIX = "default.datasource.";
+    public static final String DEFAULT_DATASOURCE_PREFIX = "default.datasource.";
 
     /**
      * 其他数据源配置前缀
      */
-    protected final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource.";
+    public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource.";
 
     protected final String DATASOURCE_BEAN_PREFIX = "datasource-";
 

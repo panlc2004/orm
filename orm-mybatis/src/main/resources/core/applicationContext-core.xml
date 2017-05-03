@@ -15,8 +15,6 @@
     <tx:annotation-driven/>
 
     <bean id="springContextHelper" class="com.czy.core.orm.tool.SpringContextHelper"/>
-    <bean id="dataSourceBuilder" class="com.czy.core.orm.config.datasource.AtomikosDataSourceBuilder"/>
-    <bean id="mybatisConfig" class="com.czy.core.orm.config.mybatis.MybatisAtomikosConfig"/>
 
     <!-- 定义受环境影响易变的变量 -->
     <bean id="propertyConfigurer"
