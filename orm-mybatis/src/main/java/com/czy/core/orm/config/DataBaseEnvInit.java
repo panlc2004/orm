@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by PLC on 2017/5/3.
