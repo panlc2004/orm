@@ -48,7 +48,9 @@ public class DataBaseEnvInit {
         if (initNormalEvnFlag) {
             initNormalEnv();
         } else {
-            initAtomikosEnv();
+//            initAtomikosEnv();
+            initNormalEnv();
+
         }
     }
 

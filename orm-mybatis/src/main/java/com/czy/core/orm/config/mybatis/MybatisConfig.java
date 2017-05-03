@@ -46,30 +46,40 @@ public class MybatisConfig {
 
     @PostConstruct
     public void registerTransactionManager() {
-        registerDynamicTransactionManager();
         registerDynamicSqlSessionFactory();
+        registerDefaultTransactionManager();
+        registerDynamicTransactionManager();
     }
 
     /**
-     * 动态注册各数据源Transactionmanager
+     * 注册默认据源Transactionmanager
+     */
+    public void registerDefaultTransactionManager() {
+        registerTransactionmanager(DataSourceBuilder.DATASOURCE_BEAN_PREFIX
+                + DataSourceBuilder.MAIN_DATASOURCE_SUFFIX, "transactionManager");
+    }
+
+    /**
+     * 注册各动态数据源Transactionmanager
      */
     public void registerDynamicTransactionManager() {
         Map<String, String> customDataSources = dataSourceBuilder.getDatasourceDialect();
-        for (String key : customDataSources.keySet()) {
-            registerTransactionmanager(key);
+        for (String dataSourceBeanName : customDataSources.keySet()) {
+            String tranBeanName = "tm-" + getDatasourceName(dataSourceBeanName);
+            registerTransactionmanager(dataSourceBeanName, tranBeanName);
         }
     }
+
+
 
     /**
      * 为数据源创建Transactionmanager
      *
      * @param dataSourceName 数据源名称
      */
-    private void registerTransactionmanager(String dataSourceName) {
-        String tranBeanName = "tm-" + getDatasourceName(dataSourceName);
+    private void registerTransactionmanager(String dataSourceName, String tranBeanName) {
         try {
             DataSource dataSource = springContextHelper.getBeanById(dataSourceName);
-//            DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("dataSource", dataSource);
             springContextHelper.addBean(DataSourceTransactionManager.class, tranBeanName, map, null, null);

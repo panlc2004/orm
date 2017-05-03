@@ -40,9 +40,9 @@ public class DataSourceBuilder {
      */
     public static final String DYNAMIC_DATASOURCE_PREFIX = "dynamic.datasource.";
 
-    protected final String DATASOURCE_BEAN_PREFIX = "datasource-";
+    public static final String DATASOURCE_BEAN_PREFIX = "datasource-";
 
-    protected final String MAIN_DATASOURCE_SUFFIX = "default";
+    public static final String MAIN_DATASOURCE_SUFFIX = "default";
     /**
      * 主数据源名称
      */
